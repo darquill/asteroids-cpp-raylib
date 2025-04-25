@@ -8,8 +8,9 @@
 class spaceship
 {
 public:
-    spaceship(float x, float y, float w, float h);
-    void render() const;
+    spaceship(float w, float h);
+    void reposition(float x, float y);
+    void render(bool debug_mode) const;
     void set_speed(float x, float y);
     void add_forward_thrust(float amount);
     void rotate(float angle);

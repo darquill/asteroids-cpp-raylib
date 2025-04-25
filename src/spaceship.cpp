@@ -1,32 +1,35 @@
-#include "spaceship.h"
-
 #include <cmath>
+#include "spaceship.h"
 #include "raymath.h"
 
 float constexpr MAX_SPEED = 8;
 
-spaceship::spaceship(const float x, const float y, const float w, const float h)
+spaceship::spaceship(const float w, const float h)
 {
     dimensions_.x = w;
     dimensions_.y = h;
+    set_bounding_box(w, h);
+}
+
+void spaceship::reposition(const float x, const float y)
+{
     position_.p1.x = x;
     position_.p1.y = y;
-    position_.p2.x = x - w / 2;
-    position_.p2.y = y + h;
-    position_.p3.x = x + w / 2;
-    position_.p3.y = y + h;
+    position_.p2.x = x - dimensions_.x / 2;
+    position_.p2.y = y + dimensions_.y;
+    position_.p3.x = x + dimensions_.x / 2;
+    position_.p3.y = y + dimensions_.y;
     speed_.x = 0;
     speed_.y = 0;
     forward_.x = 0;
     forward_.y = 1;
-    set_bounding_box(w, h);
 }
 
-void spaceship::render() const
+void spaceship::render(const bool debug_mode) const
 {
     DrawTriangle(position_.p1, position_.p2, position_.p3, WHITE);
     
-    if constexpr (DEBUG)
+    if (debug_mode)
     {
         DrawRectangleLines(
             bounding_box.x,
@@ -65,7 +68,7 @@ bool spaceship::check_collision(const std::vector<asteroid>& asteroids) const
 {
     for (auto & asteroid : asteroids)
     {
-        if (CheckCollisionCircleRec(asteroid.position, asteroid.radius, bounding_box))
+        if (CheckCollisionCircleRec(asteroid.get_position(), asteroid.radius, bounding_box))
             return true;
     }
 

@@ -1,6 +1,9 @@
 #include "asteroid.h"
 
+#include <random>
+
 #include "raylib.h"
+#include "raymath.h"
 
 asteroid::asteroid(asteroid_type type, Vector2 center)
 {
@@ -19,10 +22,43 @@ asteroid::asteroid(asteroid_type type, Vector2 center)
         break;
     }
 
-    position = center;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    float random_speed_x = (std::uniform_real_distribution<float>(1.0f, 50.0f))(gen);
+    float random_speed_y = (std::uniform_real_distribution<float>(1.0f, 50.0f))(gen);
+
+    position_ = center;
+    speed_ = { random_speed_x, random_speed_y};
 }
 
-void asteroid::render()
+void asteroid::render(bool debug_mode)
 {
-    DrawCircleLines(position.x, position.y, radius, WHITE);
+    DrawCircleLines(position_.x, position_.y, radius, WHITE);
+}
+
+void asteroid::move(float max_x, float max_y, float delta)
+{
+    position_ = Vector2Add(position_, speed_ * delta);
+
+    if (position_.x > max_x)
+    {
+        position_ = Vector2Subtract(position_, {max_x, 0});
+    } else if (position_.x < 0)
+    {
+        position_ = Vector2Add(position_, {max_x, 0});
+    }
+
+    if (position_.y > max_y)
+    {
+        position_ = Vector2Subtract(position_, {0, max_y});
+    } else if (position_.x < 0)
+    {
+        position_ = Vector2Add(position_, {0, max_y});
+    }
+}
+
+Vector2 asteroid::get_position() const
+{
+    return position_;
 }

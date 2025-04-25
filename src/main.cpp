@@ -1,10 +1,9 @@
+#include <random>
 #include <vector>
 
 #include "asteroid.h"
 #include "raylib.h"
 #include "spaceship.h"
-
-#define DEBUG true
 
 constexpr int FONT_SIZE = 10;
 constexpr int PADDING = 10;
@@ -34,35 +33,76 @@ int main ()
 	constexpr float spaceship_height = 12.0;
 	int score = 0;
 	bool game_over = false;
+	bool initialized = false;
+	bool debug_mode = false;
+	constexpr float screen_center_x = static_cast<float>(screen_width) / 2;
+	constexpr float screen_center_y = static_cast<float>(screen_height) / 2;
 	std::vector<asteroid> asteroids;
+
+	spaceship ship(spaceship_width, spaceship_height);
 	
 	// Tell the window to use vsync and work on high DPI displays
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
 	InitWindow(screen_width, screen_height, "Asteroids");
 
-	spaceship ship(
-		static_cast<float>(screen_width) / 2 - spaceship_width / 2,
-		static_cast<float>(screen_height) / 2 -  spaceship_height / 2,
-		spaceship_width,
-		spaceship_height
-		);
-
-	asteroids.reserve(NUMBER_OF_ASTEROIDS);
-	for (int i = 0; i < NUMBER_OF_ASTEROIDS; ++i)
-	{
-		asteroids.emplace_back(asteroid_type::LARGE_ASTEROID, Vector2{100.0f * i, 100.0f * i });
-	}
-
 	SetTargetFPS(60);
 	while (!WindowShouldClose())
 	{
+		// Level initialization
+		if (!initialized)
+		{
+			ship.reposition(screen_center_x, screen_center_y);
+			
+			std::random_device rd;
+			std::mt19937 gen(rd());
+
+			asteroids.clear();
+			asteroids.reserve(NUMBER_OF_ASTEROIDS);
+
+			for (int i = 0; i < NUMBER_OF_ASTEROIDS; ++i)
+			{
+				float random_x, random_y;
+
+				// Prevent asteroids from spawning in the center of the screen where the ship is
+				while (true)
+				{
+					random_x = (std::uniform_real_distribution<float>(0.0f, screen_width))(gen);
+					random_y = (std::uniform_real_distribution<float>(0.0f, screen_height))(gen);
+
+					if (constexpr float avoid_zone = 100.0f; random_x < screen_center_x - avoid_zone
+					|| random_x > screen_center_x + avoid_zone
+					|| random_y < screen_center_y - avoid_zone
+					|| random_y > screen_center_y + avoid_zone)
+					{
+						break;
+					}
+				}
+		
+				asteroids.emplace_back(asteroid_type::LARGE_ASTEROID, Vector2{random_x, random_y });
+			}
+
+			initialized = true;
+		}
+		
+		// Game logic
 		float delta = GetFrameTime();
 		BeginDrawing();
 
 		ClearBackground(BLACK);
 
-		if (!game_over)
+		if (IsKeyPressed(KEY_R))
+		{
+			initialized = false;
+			game_over = false;
+		}
+
+		if (IsKeyPressed(KEY_Z))
+		{
+			debug_mode = !debug_mode;
+		}
+
+		if (initialized && !game_over)
 		{
 			if (IsKeyDown(KEY_W))
 			{
@@ -83,13 +123,14 @@ int main ()
 			{
 				ship.rotate(-TURN_RATE * delta);
 			}
-
+			
 			ship.move(static_cast<float>(screen_width), static_cast<float>(screen_height));
-			ship.render();
+			ship.render(debug_mode);
 
 			for (auto& asteroid : asteroids)
 			{
-				asteroid.render();
+				asteroid.move(static_cast<float>(screen_width), static_cast<float>(screen_height), delta);
+				asteroid.render(debug_mode);
 			}
 
 			if (ship.check_collision(asteroids))
