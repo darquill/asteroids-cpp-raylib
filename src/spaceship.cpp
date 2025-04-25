@@ -7,6 +7,8 @@ float constexpr MAX_SPEED = 8;
 
 spaceship::spaceship(const float x, const float y, const float w, const float h)
 {
+    dimensions_.x = w;
+    dimensions_.y = h;
     position_.p1.x = x;
     position_.p1.y = y;
     position_.p2.x = x - w / 2;
@@ -17,11 +19,23 @@ spaceship::spaceship(const float x, const float y, const float w, const float h)
     speed_.y = 0;
     forward_.x = 0;
     forward_.y = 1;
+    set_bounding_box(w, h);
 }
 
 void spaceship::render() const
 {
     DrawTriangle(position_.p1, position_.p2, position_.p3, WHITE);
+    
+    if constexpr (DEBUG)
+    {
+        DrawRectangleLines(
+            bounding_box.x,
+            bounding_box.y,
+            bounding_box.width,
+            bounding_box.height,
+            BLUE
+            );
+    }
 }
 
 void spaceship::set_speed(float x, float y)
@@ -44,6 +58,18 @@ void spaceship::rotate(float const angle)
 void spaceship::move(float const max_x, float const max_y)
 {
     update_position(max_x, max_y);
+    set_bounding_box(dimensions_.x, dimensions_.y);
+}
+
+bool spaceship::check_collision(const std::vector<asteroid>& asteroids) const
+{
+    for (auto & asteroid : asteroids)
+    {
+        if (CheckCollisionCircleRec(asteroid.position, asteroid.radius, bounding_box))
+            return true;
+    }
+
+    return false;
 }
 
 void spaceship::update_position(float const max_x, float const max_y)
@@ -81,7 +107,7 @@ void spaceship::update_position(float const max_x, float const max_y)
     }
 }
 
-void spaceship::rotate_triangle(float angle)
+void spaceship::rotate_triangle(const float angle)
 {
     Vector2 const centroid = get_centroid();
 
@@ -107,6 +133,18 @@ void spaceship::rotate_triangle(float angle)
     position_.p1 = Vector2Add(r1, centroid);
     position_.p2 = Vector2Add(r2, centroid);
     position_.p3 = Vector2Add(r3, centroid);
+}
+
+void spaceship::set_bounding_box(float w, float h)
+{
+    Vector2 const centroid = get_centroid();
+
+    bounding_box = {
+        centroid.x - w / 2,
+        centroid.y - h / 2,
+        w,
+        h
+    };
 }
 
 Vector2 spaceship::get_centroid() const
