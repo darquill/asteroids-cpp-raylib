@@ -9,7 +9,6 @@ constexpr int FONT_SIZE = 10;
 constexpr int PADDING = 10;
 constexpr float THRUST_STRENGTH = 5;
 constexpr float TURN_RATE = 3;
-constexpr int NUMBER_OF_ASTEROIDS = 3;
 
 static void draw_ui(const int score, int screen_width, bool game_over)
 {
@@ -37,6 +36,7 @@ int main ()
 	bool debug_mode = false;
 	constexpr float screen_center_x = static_cast<float>(screen_width) / 2;
 	constexpr float screen_center_y = static_cast<float>(screen_height) / 2;
+	int number_of_asteroids = 1;
 	std::vector<asteroid> asteroids;
 
 	spaceship ship(spaceship_width, spaceship_height);
@@ -58,9 +58,9 @@ int main ()
 			std::mt19937 gen(rd());
 
 			asteroids.clear();
-			asteroids.reserve(NUMBER_OF_ASTEROIDS);
+			asteroids.reserve(number_of_asteroids);
 
-			for (int i = 0; i < NUMBER_OF_ASTEROIDS; ++i)
+			for (int i = 0; i < number_of_asteroids; ++i)
 			{
 				float random_x, random_y;
 
@@ -83,6 +83,7 @@ int main ()
 			}
 
 			initialized = true;
+			number_of_asteroids++; // TODO remove when adding logic for winning levels
 		}
 		
 		// Game logic
@@ -136,6 +137,7 @@ int main ()
 			if (ship.check_collision(asteroids))
 			{
 				game_over = true;
+				number_of_asteroids = 1;
 			}
 		}
 		
