@@ -153,10 +153,32 @@ int main ()
 				projectile->render(debug_mode);
 				projectile->move(delta);
 
-				auto asteroid = projectile->check_collision(asteroids);
-				if (asteroid != asteroids.end())
+				auto asteroid_collision = projectile->check_collision(asteroids);
+				if (asteroid_collision != asteroids.end())
 				{
-					asteroids.erase(asteroid);
+					Vector2 asteroid_collision_position = asteroid_collision->get_position();
+					asteroid_type asteroid_collision_type = asteroid_collision->type;
+					asteroids.erase(asteroid_collision);
+
+					// Instead of immediately removing them spawn 2x smaller type of asteroid unless type is already the smallest
+					if (asteroid_collision_type != asteroid_type::SMALL_ASTEROID)
+					{
+						asteroid_type new_type;
+						if (asteroid_collision_type == asteroid_type::LARGE_ASTEROID)
+						{
+							new_type = asteroid_type::MEDIUM_ASTEROID;
+						} else // MEDIUM_ASTEROID
+						{
+							new_type = asteroid_type::SMALL_ASTEROID;
+						}
+
+						asteroid asteroid_a(new_type, asteroid_collision_position);
+						asteroid asteroid_b(new_type, asteroid_collision_position);
+
+						asteroids.emplace_back(asteroid_a);
+						asteroids.emplace_back(asteroid_b);
+					}
+
 					projectile = projectiles.erase(projectile);
 				} else
 				{

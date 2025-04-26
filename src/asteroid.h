@@ -15,10 +15,10 @@ public:
     void render(bool debug_mode);
     void move(float max_x, float max_y, float delta);
     Vector2 get_position() const;
+    asteroid_type type;
     float radius;
 
 protected:
-    asteroid_type type_;
     Vector2 position_;
     Vector2 speed_;
 };

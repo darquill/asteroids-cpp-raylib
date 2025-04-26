@@ -3,9 +3,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
-asteroid::asteroid(asteroid_type type, Vector2 center)
+asteroid::asteroid(asteroid_type t, Vector2 center)
 {
-    type_ = type;
+    type = t;
     
     switch (type)
     {
