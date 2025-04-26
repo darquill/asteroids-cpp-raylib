@@ -32,6 +32,15 @@ namespace
 			DrawText(press_enter_to_restart.c_str(), screen_width / 2 - press_enter_to_restart_measure / 2, screen_height / 2 + font_size * 2 + font_size, font_size, WHITE);
 		}
 	}
+
+	asteroid_type random_asteroid_type()
+	{
+		static std::random_device rd;  // seed
+		static std::mt19937 gen(rd()); // random number generator
+		static std::uniform_int_distribution<> dist(0, 2); // 0 to 2 inclusive
+
+		return static_cast<asteroid_type>(dist(gen));
+	}
 }
 
 int main ()
@@ -91,7 +100,7 @@ int main ()
 					}
 				}
 		
-				asteroids.emplace_back(asteroid_type::LARGE_ASTEROID, Vector2{random_x, random_y });
+				asteroids.emplace_back(random_asteroid_type(), Vector2{random_x, random_y });
 			}
 
 			initialized = true;

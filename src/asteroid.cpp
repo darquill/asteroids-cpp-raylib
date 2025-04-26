@@ -6,14 +6,17 @@
 asteroid::asteroid(asteroid_type t, Vector2 center)
 {
     type = t;
+    float max_speed = 50.0f;
     
     switch (type)
     {
     case asteroid_type::SMALL_ASTEROID:
         radius = 5.0;
+        max_speed = 100.0f;
         break;
     case asteroid_type::MEDIUM_ASTEROID:
         radius = 15.0;
+        max_speed = 75.0f;
         break;
     case asteroid_type::LARGE_ASTEROID:
         radius = 25.0;
@@ -23,8 +26,8 @@ asteroid::asteroid(asteroid_type t, Vector2 center)
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    float random_speed_x = (std::uniform_real_distribution<float>(1.0f, 50.0f))(gen);
-    float random_speed_y = (std::uniform_real_distribution<float>(1.0f, 50.0f))(gen);
+    float random_speed_x = (std::uniform_real_distribution<float>(1.0f, max_speed))(gen);
+    float random_speed_y = (std::uniform_real_distribution<float>(1.0f, max_speed))(gen);
 
     position_ = center;
     speed_ = { random_speed_x, random_speed_y};
