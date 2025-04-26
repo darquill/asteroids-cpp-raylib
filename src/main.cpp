@@ -7,26 +7,30 @@
 #include "spaceship.h"
 
 class projectile;
-constexpr int FONT_SIZE = 10;
-constexpr int PADDING = 10;
-constexpr float THRUST_STRENGTH = 5;
-constexpr float TURN_RATE = 3;
+constexpr float thrust_strength = 5;
+constexpr float turn_rate = 3;
 
-static void draw_ui(const int score, int screen_width, int screen_height, bool game_over)
+namespace
 {
-	DrawText("Asteroids", PADDING,PADDING, FONT_SIZE, WHITE);
-	const char* score_text = TextFormat("Score: %d", score);
-	const int text_measure = MeasureText(score_text, FONT_SIZE);
-	DrawText(score_text, screen_width - text_measure - PADDING,PADDING,FONT_SIZE, WHITE);
-
-	if (game_over)
+	void draw_ui(const int score, int screen_width, int screen_height, bool game_over)
 	{
-		std::string press_enter_to_restart = "Press ENTER to restart";
-		std::string game_over_text = "Game Over";
-		const int gameover_text_measure = MeasureText(game_over_text.c_str(), FONT_SIZE * 2);
-		const int press_enter_to_restart_measure = MeasureText(press_enter_to_restart.c_str(), FONT_SIZE);
-		DrawText(game_over_text.c_str(), screen_width / 2 - gameover_text_measure / 2,screen_height / 2, FONT_SIZE * 2, RED);
-		DrawText(press_enter_to_restart.c_str(), screen_width / 2 - press_enter_to_restart_measure / 2, screen_height / 2 + FONT_SIZE * 2 + FONT_SIZE, FONT_SIZE, WHITE);
+		constexpr int font_size = 10;
+		constexpr int padding = 10;
+		DrawText("Asteroids", padding,padding, font_size, WHITE);
+		const char* score_text = TextFormat("Score: %d", score);
+		const int text_measure = MeasureText(score_text, font_size);
+		DrawText(score_text, screen_width - text_measure - padding,padding,font_size, WHITE);
+		DrawText("Controls: WASD + SPACE", padding, screen_height - padding - font_size, font_size, WHITE);
+
+		if (game_over)
+		{
+			std::string press_enter_to_restart = "Press ENTER to restart";
+			std::string game_over_text = "Game Over";
+			const int game_over_text_measure = MeasureText(game_over_text.c_str(), font_size * 2);
+			const int press_enter_to_restart_measure = MeasureText(press_enter_to_restart.c_str(), font_size);
+			DrawText(game_over_text.c_str(), screen_width / 2 - game_over_text_measure / 2,screen_height / 2, font_size * 2, RED);
+			DrawText(press_enter_to_restart.c_str(), screen_width / 2 - press_enter_to_restart_measure / 2, screen_height / 2 + font_size * 2 + font_size, font_size, WHITE);
+		}
 	}
 }
 
@@ -121,22 +125,22 @@ int main ()
 		{
 			if (IsKeyDown(KEY_W))
 			{
-				ship.add_forward_thrust(THRUST_STRENGTH * delta);
+				ship.add_forward_thrust(thrust_strength * delta);
 			}
 
 			if (IsKeyDown(KEY_S))
 			{
-				ship.add_forward_thrust(-THRUST_STRENGTH * delta);
+				ship.add_forward_thrust(-thrust_strength * delta);
 			}
 
 			if (IsKeyDown(KEY_D))
 			{
-				ship.rotate(TURN_RATE * delta);
+				ship.rotate(turn_rate * delta);
 			}
 
 			if (IsKeyDown(KEY_A))
 			{
-				ship.rotate(-TURN_RATE * delta);
+				ship.rotate(-turn_rate * delta);
 			}
 
 			if (IsKeyDown(KEY_SPACE) && rate_of_fire_timer > 0.5f)
