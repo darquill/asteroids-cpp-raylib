@@ -12,7 +12,7 @@ constexpr int PADDING = 10;
 constexpr float THRUST_STRENGTH = 5;
 constexpr float TURN_RATE = 3;
 
-static void draw_ui(const int score, int screen_width, bool game_over)
+static void draw_ui(const int score, int screen_width, int screen_height, bool game_over)
 {
 	DrawText("Asteroids", PADDING,PADDING, FONT_SIZE, WHITE);
 	const char* score_text = TextFormat("Score: %d", score);
@@ -21,8 +21,12 @@ static void draw_ui(const int score, int screen_width, bool game_over)
 
 	if (game_over)
 	{
-		const int gameover_text_measure = MeasureText("Game Over", FONT_SIZE);
-		DrawText("Game Over", screen_width / 2 - gameover_text_measure / 2,PADDING, FONT_SIZE, RED);
+		std::string press_enter_to_restart = "Press ENTER to restart";
+		std::string game_over_text = "Game Over";
+		const int gameover_text_measure = MeasureText(game_over_text.c_str(), FONT_SIZE * 2);
+		const int press_enter_to_restart_measure = MeasureText(press_enter_to_restart.c_str(), FONT_SIZE);
+		DrawText(game_over_text.c_str(), screen_width / 2 - gameover_text_measure / 2,screen_height / 2, FONT_SIZE * 2, RED);
+		DrawText(press_enter_to_restart.c_str(), screen_width / 2 - press_enter_to_restart_measure / 2, screen_height / 2 + FONT_SIZE * 2 + FONT_SIZE, FONT_SIZE, WHITE);
 	}
 }
 
@@ -87,7 +91,6 @@ int main ()
 			}
 
 			initialized = true;
-			number_of_asteroids++; // TODO remove when adding logic for winning levels
 		}
 		
 		// Game logic
@@ -106,6 +109,12 @@ int main ()
 		if (IsKeyPressed(KEY_Z))
 		{
 			debug_mode = !debug_mode;
+		}
+
+		if (game_over && IsKeyPressed(KEY_ENTER))
+		{
+			game_over = false;
+			initialized = false;
 		}
 
 		if (initialized && !game_over)
@@ -167,9 +176,11 @@ int main ()
 						if (asteroid_collision_type == asteroid_type::LARGE_ASTEROID)
 						{
 							new_type = asteroid_type::MEDIUM_ASTEROID;
+							score += 1;
 						} else // MEDIUM_ASTEROID
 						{
 							new_type = asteroid_type::SMALL_ASTEROID;
+							score += 5;
 						}
 
 						asteroid asteroid_a(new_type, asteroid_collision_position);
@@ -177,6 +188,9 @@ int main ()
 
 						asteroids.emplace_back(asteroid_a);
 						asteroids.emplace_back(asteroid_b);
+					} else
+					{
+						score += 10;
 					}
 
 					projectile = projectiles.erase(projectile);
@@ -196,9 +210,15 @@ int main ()
 				game_over = true;
 				number_of_asteroids = 1;
 			}
+
+			if (asteroids.empty())
+			{
+				initialized = false;
+				number_of_asteroids++;
+			}
 		}
 		
-		draw_ui(score, screen_width, game_over);
+		draw_ui(score, screen_width, screen_height, game_over);
 		
 		EndDrawing();
 	}
