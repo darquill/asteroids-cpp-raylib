@@ -2,9 +2,11 @@
 #include <vector>
 
 #include "asteroid.h"
+#include "projectile.h"
 #include "raylib.h"
 #include "spaceship.h"
 
+class projectile;
 constexpr int FONT_SIZE = 10;
 constexpr int PADDING = 10;
 constexpr float THRUST_STRENGTH = 5;
@@ -26,8 +28,8 @@ static void draw_ui(const int score, int screen_width, bool game_over)
 
 int main ()
 {
-	constexpr int screen_width = 512;
-	constexpr int screen_height = 512;
+	static constexpr int screen_width = 512;
+	static constexpr int screen_height = 512;
 	constexpr float spaceship_width = 10.0;
 	constexpr float spaceship_height = 12.0;
 	int score = 0;
@@ -37,7 +39,9 @@ int main ()
 	constexpr float screen_center_x = static_cast<float>(screen_width) / 2;
 	constexpr float screen_center_y = static_cast<float>(screen_height) / 2;
 	int number_of_asteroids = 1;
+	float rate_of_fire_timer = 0;
 	std::vector<asteroid> asteroids;
+	std::vector<projectile> projectiles;
 
 	spaceship ship(spaceship_width, spaceship_height);
 	
@@ -88,6 +92,7 @@ int main ()
 		
 		// Game logic
 		float delta = GetFrameTime();
+		rate_of_fire_timer += delta;
 		BeginDrawing();
 
 		ClearBackground(BLACK);
@@ -107,12 +112,12 @@ int main ()
 		{
 			if (IsKeyDown(KEY_W))
 			{
-				ship.add_forward_thrust(-THRUST_STRENGTH * delta);
+				ship.add_forward_thrust(THRUST_STRENGTH * delta);
 			}
 
 			if (IsKeyDown(KEY_S))
 			{
-				ship.add_forward_thrust(THRUST_STRENGTH * delta);
+				ship.add_forward_thrust(-THRUST_STRENGTH * delta);
 			}
 
 			if (IsKeyDown(KEY_D))
@@ -124,6 +129,15 @@ int main ()
 			{
 				ship.rotate(-TURN_RATE * delta);
 			}
+
+			if (IsKeyDown(KEY_SPACE) && rate_of_fire_timer > 0.5f)
+			{
+				auto [x, y] = ship.get_position();
+				projectile p(ship.get_forward(), x, y);
+
+				projectiles.emplace_back(p);
+				rate_of_fire_timer = 0;
+			}
 			
 			ship.move(static_cast<float>(screen_width), static_cast<float>(screen_height));
 			ship.render(debug_mode);
@@ -133,6 +147,27 @@ int main ()
 				asteroid.move(static_cast<float>(screen_width), static_cast<float>(screen_height), delta);
 				asteroid.render(debug_mode);
 			}
+
+			for (auto projectile = projectiles.begin(); projectile != projectiles.end();)
+			{
+				projectile->render(debug_mode);
+				projectile->move(delta);
+
+				auto asteroid = projectile->check_collision(asteroids);
+				if (asteroid != asteroids.end())
+				{
+					asteroids.erase(asteroid);
+					projectile = projectiles.erase(projectile);
+				} else
+				{
+					++projectile;
+				}
+			}
+
+			projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](const projectile& p)
+			{
+				return p.is_out_of_bounds(screen_width, screen_height);
+			}), projectiles.end());
 
 			if (ship.check_collision(asteroids))
 			{

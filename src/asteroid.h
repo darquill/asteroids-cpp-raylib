@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-
 #include "raylib.h"
 
 enum class asteroid_type : std::uint8_t {

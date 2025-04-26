@@ -19,10 +19,8 @@ void spaceship::reposition(const float x, const float y)
     position_.p2.y = y + dimensions_.y;
     position_.p3.x = x + dimensions_.x / 2;
     position_.p3.y = y + dimensions_.y;
-    speed_.x = 0;
-    speed_.y = 0;
-    forward_.x = 0;
-    forward_.y = 1;
+    speed_ = {0 , 0};
+    forward_ = {0, -1};
 }
 
 void spaceship::render(const bool debug_mode) const
@@ -73,6 +71,16 @@ bool spaceship::check_collision(const std::vector<asteroid>& asteroids) const
     }
 
     return false;
+}
+
+Vector2 spaceship::get_position() const
+{
+    return get_centroid();
+}
+
+Vector2 spaceship::get_forward() const
+{
+    return forward_;
 }
 
 void spaceship::update_position(float const max_x, float const max_y)

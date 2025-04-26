@@ -16,6 +16,8 @@ public:
     void rotate(float angle);
     void move(float max_x, float max_y);
     bool check_collision(const std::vector<asteroid>&) const;
+    Vector2 get_position() const;
+    Vector2 get_forward() const;
     Rectangle bounding_box;
 
 protected:

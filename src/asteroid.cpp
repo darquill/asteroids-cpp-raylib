@@ -1,7 +1,5 @@
-#include "asteroid.h"
-
 #include <random>
-
+#include "asteroid.h"
 #include "raylib.h"
 #include "raymath.h"
 
