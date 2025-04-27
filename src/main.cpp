@@ -222,6 +222,7 @@ int main ()
 			{
 				game_over = true;
 				number_of_asteroids = 1;
+				score = 0;
 			}
 
 			if (asteroids.empty())
